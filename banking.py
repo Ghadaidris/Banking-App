@@ -2,7 +2,7 @@ import csv
 import os ## to make sure the file is found in the OS
 
 
-# Classes
+#the classes
 
 class Account:
     def __init__(self, balance=0, active=True, overdraft_count=0):
@@ -34,11 +34,11 @@ def parse_balance(value):## this function to make sure that values like faluse a
  
     if value is None:
         return 0.0
-    s = str(value).strip()
-    if s.lower() == "false" or s == "":
+    s = str(value).strip() ##transfer the value to str n make sure its w/o any spaces 
+    if s.lower() == "false" or s == "":## if the str is false or empty return 0.0
         return 0.0
     try:
-        return float(s)
+        return float(s) ## transfer the str to float if fails return 0.0
     except ValueError:
         return 0.0
 
@@ -47,7 +47,7 @@ def parse_balance(value):## this function to make sure that values like faluse a
 # Load Customers from CSV
 
 def load_customers(filename="bank.csv"):
-    customers = {}
+    customers = {}## holds all our customers 
     ## if the file doesnt exists make the file 
     if not os.path.exists(filename):
         with open(filename, "w", newline="") as f:
@@ -75,7 +75,7 @@ def load_customers(filename="bank.csv"):
 
 
 
-# Save Customers to CSV
+##save customers to csv
 
 def save_customers(customers, filename="bank.csv"):
    
@@ -99,10 +99,10 @@ def save_customers(customers, filename="bank.csv"):
 
 
 
-# Create New Account
+##create new account
 
 def create_account(customers, filename="bank.csv"):
-    print("\n--- Create New Account ---")
+    print("--- Create New Account ---")
     while True:
         new_id = input("Enter Your ID: ").strip()
         if new_id in customers:
@@ -125,8 +125,7 @@ def create_account(customers, filename="bank.csv"):
     return new_customer
 
 
-
-# Login Function
+# login function
 
 def login(customers):
     print("Welcome to Ghada Bank!")
@@ -152,11 +151,11 @@ def login(customers):
 
 
 
-# Deposit Function 
+# deposit function 
 
 def deposit(customer, customers, filename="bank.csv"):
     
-    print("\n--- Deposit ---")
+    print("--- Deposit ---")
     
     while True:## keep the loop till the input is correct 
         acct = input("Deposit to (checking/savings): ").strip().lower() ##acct short for account , used strip n lower to insure clean input 
@@ -183,17 +182,17 @@ def deposit(customer, customers, filename="bank.csv"):
         customer.savings.balance += amount
 
     #print to insure the user that the process is done 
-    print(f"✅ Deposited {amount:.2f} to your {acct}.")
-    print(f"New balances => Checking: {customer.checking.balance:.2f}, Savings: {customer.savings.balance:.2f}")
+    print(f"Deposited {amount:.2f} to your {acct}.")
+    print(f"New balances => Checking: {customer.checking.balance:.2f}, Savings: {customer.savings.balance:.2f}") ## used .2f to print float number 
 
     ## saving the changes again
     save_customers(customers, filename)
 
-# Main Menu
+# main menu
 
-def main_menu(customer, customers):
+def main_menu(customer, customers): ## customer is the class for one customers , customers is the dictionary that holds all our customers 
     while True:
-        print("\nMain Menu")
+        print("Main Menu")
         print("1. View Balances")
         print("2. Deposit Money")
         print("3. Withdraw Money")
@@ -212,7 +211,7 @@ def main_menu(customer, customers):
 
 
 
-# Main Program
+# main program
 
 def main():
     customers = load_customers()
