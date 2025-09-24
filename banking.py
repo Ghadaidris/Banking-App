@@ -221,62 +221,101 @@ def deposit(customer, customers, filename="bank.csv"):
 
 
 
-    # Withdraw function
-def withdraw(customer, customers, filename="bank.csv"):
+  def withdraw(customer, customers, filename="bank.csv"):
     print("--- Withdraw ---")
     
     while True:
-        acct = input("Withdraw from (checking/savings): ").strip().lower()
+        acct = input("Withdraw from (checking/savings): ").strip().lower()  ##acct short for account , used strip n lower to insure clean input 
         if acct in ("checking", "savings"):
             break
         print("Please type 'checking' or 'savings'.")
 
-    # input amount
-    amount_str = input("Amount to withdraw: ").strip()
+    amount_str = input("Amount to withdraw: ").strip() ## the amount that the user want to withdraw
     try:
-        amount = float(amount_str)  # convert to float
-    except ValueError:
+        amount = float(amount_str) ##change the str to float 
+    except ValueError: ##if input value isnt accepted 
         print("Invalid amount. Please enter a number.")
+        return  ## exit if the input isnt valid 
+
+    if amount <= 0:
+        print("Amount must be greater than 0.")
+        return
+
+    account = customer.checking if acct == "checking" else customer.savings  ## specify which account
+
+    ## overdraft control flow
+    if account.balance < 0 and amount > 100:
+        print("Cannot withdraw more than $100 when account balance is negative.")
+        return
+    if amount > 100:
+        print("Cannot withdraw more than $100 in one transaction.")
+        return
+
+    account.balance -= amount
+
+    ## check the overdarft
+    if account.balance < 0:
+        account.overdraft_count += 1
+        account.balance -= 35  ##subtract the fee
+        print(f"Overdraft! You are charged $35. New balance: {account.balance:.2f}")
+        if account.overdraft_count > 2:
+            account.active = False
+            print(f"Your {acct} account has been deactivated due to multiple overdrafts.")
+    else:
+        print(f"Withdrawn {amount:.2f} from your {acct}. New balance: {account.balance:.2f}")
+
+    save_customers(customers, filename) ## saving the changes again
+
+
+# Transfer function
+def transfer(customer, customers, filename="bank.csv"):
+    print("--- Transfer ---")
+    
+    from_acct_input = input("Transfer from (checking/savings): ").strip().lower()
+    if from_acct_input not in ("checking", "savings"):
+        print("Invalid account choice.")
+        return
+
+    from_account = customer.checking if from_acct_input == "checking" else customer.savings
+
+    to_choice = input("Transfer to (checking/savings/other customer): ").strip().lower()
+    if to_choice not in ("checking", "savings", "other customer"):
+        print("Invalid choice.")
+        return
+
+    amount_str = input("Amount to transfer: ").strip()
+    try:
+        amount = float(amount_str)
+    except ValueError:
+        print("Invalid amount.")
         return
 
     if amount <= 0:
         print("Amount must be greater than 0.")
         return
 
-    # select account object
-    account = customer.checking if acct == "checking" else customer.savings
+    # Transfer logic
+    if to_choice in ("checking", "savings"):
+        to_account = customer.checking if to_choice == "checking" else customer.savings
+        from_account.balance -= amount
+        to_account.balance += amount
+        print(f"Transferred {amount:.2f} from {from_acct_input} to {to_choice}.")
+    else:  # Transfer to another customer
+        other_id = input("Enter recipient customer ID: ").strip()
+        if other_id not in customers:
+            print("Customer ID not found.")
+            return
+        recipient = customers[other_id]
+        to_account_input = input("Deposit to their (checking/savings): ").strip().lower()
+        if to_account_input not in ("checking", "savings"):
+            print("Invalid account choice for recipient.")
+            return
+        to_account = recipient.checking if to_account_input == "checking" else recipient.savings
+        from_account.balance -= amount
+        to_account.balance += amount
+        print(f"Transferred {amount:.2f} from your {from_acct_input} to {recipient.first_name}'s {to_account_input}.")
 
-    # check if account is active
-    if not account.active:
-        print(f"Your {acct} account is deactivated due to overdraft.")
-        return
-
-    # max withdrawal if balance negative
-    if account.balance < 0 and amount > 100:
-        print("Cannot withdraw more than $100 when account balance is negative.")
-        return
-
-    # max per transaction
-    if amount > 100:
-        print("Cannot withdraw more than $100 in a single transaction.")
-        return
-
-    # subtract amount
-    account.balance -= amount
-
-    # handle overdraft
-    if account.balance < 0:
-        account.overdraft_count += 1
-        account.balance -= 35  # overdraft fee
-        print(f"Overdraft! You have been charged $35. Current balance: {account.balance:.2f}")
-        if account.overdraft_count > 2:
-            account.active = False
-            print(f"{acct.capitalize()} account deactivated due to repeated overdrafts.")
-
-    else:
-        print(f"Withdrew {amount:.2f} from your {acct}. Current balance: {account.balance:.2f}")
-
-    # save changes to CSV
+    print(f"New balances => Checking: {customer.checking.balance:.2f}, Savings: {customer.savings.balance:.2f}")
     save_customers(customers, filename)
 
 
@@ -296,7 +335,11 @@ def main_menu(customer, customers): ## customer is the class for one customers ,
         elif choice == "2":
             deposit(customer, customers)  ## call the deposit function 
         elif choice == "3":
-           withdraw(customer, customers)  ## call the withdraw function 
+           withdraw(customer, customers)  ## call the withdraw function
+
+        elif choice == "4":
+            transfer(customer, customers)## call the transfer function
+ 
         elif choice == "5":
             print("Logging out...")
             break
