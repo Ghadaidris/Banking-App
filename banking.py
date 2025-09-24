@@ -101,27 +101,58 @@ def save_customers(customers, filename="bank.csv"):
 
 ##create new account
 
-def create_account(customers, filename="bank.csv"):
+def create_account(customers):
     print("--- Create New Account ---")
-    while True:
-        new_id = input("Enter Your ID: ").strip()
-        if new_id in customers:
-            print("ID already exists. log in to your account.")
-        else:
-            break
-    first_name = input("First Name: ").strip()
-    last_name = input("Last Name: ").strip()
-    password = input("Password: ").strip()
-    #initilize the variabls w zeros 
-    checking = 0
-    savings = 0
-    active = True
-    overdraft_count = 0
-    new_customer = Customer(new_id, first_name, last_name, password, checking, savings, active, overdraft_count)
-    customers[new_id] = new_customer
-    ## call this function to write the new customers in the csv file 
-    save_customers(customers, filename)
-    print(f"Account for {first_name} {last_name} created successfully!")
+    first_name = input("First Name: ")
+    last_name = input("Last Name: ")
+    password = input("Password: ")
+
+    # generate new ID
+    if customers:
+        new_id = max(int(cid) for cid in customers.keys()) + 1
+    else:
+        new_id = 10001  # first ID if file is empty
+
+    # initialize checking and savings
+    open_checking = input("Do you want to open a Checking Account? (y/n): ").lower()
+    if open_checking == "y":
+        checking = 0.0
+        checking_active = True
+    else:
+        checking = 0.0
+        checking_active = False
+
+    open_savings = input("Do you want to open a Savings Account? (y/n): ").lower()
+    if open_savings == "y":
+        savings = 0.0
+        savings_active = True
+    else:
+        savings = 0.0
+        savings_active = False
+
+    # create new customer
+    new_customer = Customer(
+        id=new_id,
+        first_name=first_name,
+        last_name=last_name,
+        password=password,
+        checking=checking,
+        savings=savings,
+        active=True,
+        overdraft_count=0
+    )
+
+    # set account activeness
+    new_customer.checking.active = checking_active
+    new_customer.savings.active = savings_active
+
+    # add to dictionary and save
+    customers[str(new_id)] = new_customer
+    save_customers(customers)
+
+    
+
+    print(f"Account for {first_name} {last_name} created successfully! Your ID is {new_id}")
     return new_customer
 
 
