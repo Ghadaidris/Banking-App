@@ -219,6 +219,67 @@ def deposit(customer, customers, filename="bank.csv"):
     ## saving the changes again
     save_customers(customers, filename)
 
+
+
+    # Withdraw function
+def withdraw(customer, customers, filename="bank.csv"):
+    print("--- Withdraw ---")
+    
+    while True:
+        acct = input("Withdraw from (checking/savings): ").strip().lower()
+        if acct in ("checking", "savings"):
+            break
+        print("Please type 'checking' or 'savings'.")
+
+    # input amount
+    amount_str = input("Amount to withdraw: ").strip()
+    try:
+        amount = float(amount_str)  # convert to float
+    except ValueError:
+        print("Invalid amount. Please enter a number.")
+        return
+
+    if amount <= 0:
+        print("Amount must be greater than 0.")
+        return
+
+    # select account object
+    account = customer.checking if acct == "checking" else customer.savings
+
+    # check if account is active
+    if not account.active:
+        print(f"Your {acct} account is deactivated due to overdraft.")
+        return
+
+    # max withdrawal if balance negative
+    if account.balance < 0 and amount > 100:
+        print("Cannot withdraw more than $100 when account balance is negative.")
+        return
+
+    # max per transaction
+    if amount > 100:
+        print("Cannot withdraw more than $100 in a single transaction.")
+        return
+
+    # subtract amount
+    account.balance -= amount
+
+    # handle overdraft
+    if account.balance < 0:
+        account.overdraft_count += 1
+        account.balance -= 35  # overdraft fee
+        print(f"Overdraft! You have been charged $35. Current balance: {account.balance:.2f}")
+        if account.overdraft_count > 2:
+            account.active = False
+            print(f"{acct.capitalize()} account deactivated due to repeated overdrafts.")
+
+    else:
+        print(f"Withdrew {amount:.2f} from your {acct}. Current balance: {account.balance:.2f}")
+
+    # save changes to CSV
+    save_customers(customers, filename)
+
+
 # main menu
 
 def main_menu(customer, customers): ## customer is the class for one customers , customers is the dictionary that holds all our customers 
@@ -234,6 +295,8 @@ def main_menu(customer, customers): ## customer is the class for one customers ,
             print(f"Checking: {customer.checking.balance}, Savings: {customer.savings.balance}") ## print the customer balance 
         elif choice == "2":
             deposit(customer, customers)  ## call the deposit function 
+        elif choice == "3":
+           withdraw(customer, customers)  ## call the withdraw function 
         elif choice == "5":
             print("Logging out...")
             break

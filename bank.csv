@@ -11,5 +11,5 @@ id,first_name,last_name,password,checking,savings,active,overdraft_count
 100010,Jake ,Paul,wegtr,10000.0,-10.0,True,0
 100011,rtg,drg,2435365,5000.0,0.0,True,0
 100012,Devlin,Booth,123456,0.0,0.0,True,0
-11009,ghada,idris,1423,2000.0,0.0,True,0
+11009,ghada,idris,1423,1900.0,0.0,True,0
 100013,ghada,idris,5555,0.0,0.0,True,0
