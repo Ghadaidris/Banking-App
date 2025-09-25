@@ -1,0 +1,2 @@
+timestamp,customer_id,type,amount,account,target_id
+2025-09-25 09:45:21,100014,deposit,5000.0,checking,
